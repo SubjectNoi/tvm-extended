@@ -65,6 +65,8 @@ Registry& Registry::Register(const std::string& name, bool can_override) {  // N
   Manager* m = Manager::Global();
   std::lock_guard<std::mutex> lock(m->mutex);
   if (m->fmap.count(name)) {
+    // std::cout << name << " " << can_override << std::endl;
+    if (name == "relay.op._make.Comm") can_override = true;
     ICHECK(can_override) << "Global PackedFunc " << name << " is already registered";
   }
 

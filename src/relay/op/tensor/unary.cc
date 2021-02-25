@@ -525,5 +525,27 @@ RELAY_REGISTER_UNARY_OP("isinf")
     .add_type_rel("IdentityCompRel", IdentityCompRel)
     .set_attr<FTVMCompute>("FTVMCompute", RELAY_UNARY_COMPUTE(topi::isinf));
 
+TVM_REGISTER_NODE_TYPE(CommAttrs);
+RELAY_REGISTER_UNARY_OP("Comm")
+    .describe("Communication Node for TianMu")
+    .set_num_inputs(1)
+    .add_argument("in_tensor", "Tensor", "")
+    .set_support_level(12)
+    .set_attr<int64_t>("comm_tag"        , -1)
+    .set_attr<String>("comm_target"     , "")
+    .set_attr<double>("comm_size_in_KB" , 0.0)
+    .set_attr<String>("sub_type"        , "")
+    // .set_attr("launch_order"    , 0)
+    .add_type_rel("IdentityRel", IdentityRel);
+TVM_REGISTER_GLOBAL("relay.op._make.Comm")
+    .set_body_typed([](Expr in_tensor, String comm_target, String sub_type, double comm_size_in_KB, int64_t comm_tag) {
+        auto attrs = make_object<CommAttrs>();
+        attrs->comm_target = comm_target;
+        attrs->sub_type = sub_type;
+        attrs->comm_size_in_KB = comm_size_in_KB;
+        attrs->comm_tag = comm_tag;
+        static const Op& op = Op::Get("Comm");
+        return Call(op, {in_tensor}, Attrs(attrs), {});
+    });
 }  // namespace relay
 }  // namespace tvm

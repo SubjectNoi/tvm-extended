@@ -83,9 +83,13 @@ struct TransposeAttrs : public tvm::AttrsNode<TransposeAttrs> {
 /*! \brief Attributes used in reshape operators */
 struct ReshapeAttrs : public tvm::AttrsNode<ReshapeAttrs> {
   Array<Integer> newshape;
+  bool reverse;
   TVM_DECLARE_ATTRS(ReshapeAttrs, "relay.attrs.ReshapeAttrs") {
     TVM_ATTR_FIELD(newshape).describe(
         "The new shape. Should be compatible with the original shape.");
+    TVM_ATTR_FIELD(reverse)
+        .describe("Infer the special values from right to left if true")
+        .set_default(false);
   }
 };  // struct ReshapeAttrs
 
@@ -406,6 +410,19 @@ struct NdarraySizeAttrs : public tvm::AttrsNode<NdarraySizeAttrs> {
   }
 };
 
+struct CommAttrs : public tvm::AttrsNode<CommAttrs> {
+    std::string comm_target;
+    std::string sub_type;
+    int64_t comm_tag;
+    double comm_size_in_KB;
+    TVM_DECLARE_ATTRS(CommAttrs, "relay.attrs.CommAttrs") {
+      TVM_ATTR_FIELD(comm_target).describe("").set_default("");
+      TVM_ATTR_FIELD(sub_type).describe("").set_default("");
+      TVM_ATTR_FIELD(comm_tag).describe("").set_default(-1);
+      TVM_ATTR_FIELD(comm_size_in_KB).describe("").set_default(0.0);
+    }
+};
+
 /*! \brief Attributes used in one-hot operator */
 struct OneHotAttrs : public tvm::AttrsNode<OneHotAttrs> {
   int depth;
@@ -437,16 +454,6 @@ struct MatrixSetDiagAttrs : public tvm::AttrsNode<MatrixSetDiagAttrs> {
         .describe("Bool, true iff sub-diagonal is right aligned (left-padded).");
   }
 };  // struct MatrixSetDiagAttrs
-
-/*! \brief Attributes used in cumsum operator */
-struct CumsumAttrs : public tvm::AttrsNode<CumsumAttrs> {
-  Integer axis;
-  DataType dtype;
-  TVM_DECLARE_ATTRS(CumsumAttrs, "relay.attrs.CumsumAttrs") {
-    TVM_ATTR_FIELD(axis).describe("The axis to sum over").set_default(NullValue<Integer>());
-    TVM_ATTR_FIELD(dtype).describe("Output data type").set_default(NullValue<DataType>());
-  }
-};
 
 }  // namespace relay
 }  // namespace tvm
